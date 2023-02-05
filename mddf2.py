@@ -5,13 +5,21 @@ import shutil
 import argparse
 import locale
 from datetime import datetime
+from functions import *
 
 
-locale.setlocale(locale.LC_TIME, 'es_ES')
+#locale.setlocale(locale.LC_TIME, 'es_ES')
+locale.setlocale(locale.LC_ALL, '')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("sd", help="Source directory")
 parser.add_argument("td", help="Target directory")
+parser.add_argument('-ds', '--delstr', action='store_true', help='delete str in directories and files')
+parser.add_argument('-dd', '--deldate', action='store_true', help='delete date str in directories and files')
+parser.add_argument('-anf', '--addNameFolderToFolder', action='store_true', help='add name folder to new folder name')
+parser.add_argument('-and', '--addNameFolderToFile', action='store_true',   help='add name folder to new file name')
+
+
 #parser.add_argument("dn", help="add the date to begint of the file name")
 #parser.add_argument("r", help="add the date to begint of the file name")
 
@@ -22,42 +30,13 @@ if args.sd:
     src_folder = sys.argv[1]
     tar_folder = sys.argv[2]
     print (tar_folder)
-    if(tar_folder!=""):
+    if(tar_folder==""):
         tar_folder=src_folder
-        
-    def move_files(src_folder):
-        for dirpath, dirnames, filenames in os.walk(src_folder):
-            for file in filenames:
-                file_path = os.path.join(dirpath, file)
-                # Obtener la fecha de modificación del archivo
-                modify_date = datetime.fromtimestamp(os.path.getmtime(file_path))
-                # Crear la ruta de destino con el nombre del año y mes
-                
-                dest_folder = os.path.join(tar_folder, modify_date.strftime("%Y"))
-                
-                # Crear la carpeta de destino si no existe
-                if not os.path.exists(dest_folder):
-                    os.makedirs(dest_folder)
-                    
-                dest_folder = dest_folder + "\\" + modify_date.strftime("%m - %B")
-                
-                # Crear la carpeta de destino si no existe
-                if not os.path.exists(dest_folder):
-                    os.makedirs(dest_folder)
-                    
-                dest_folder = dest_folder + "\\" + modify_date.strftime("%Y-%m-%d [ %A ]")
-                 
-                # Crear la carpeta de destino si no existe
-                if not os.path.exists(dest_folder):
-                    os.makedirs(dest_folder)
-                print ("==========================================")                            
-                print ("Moving from: "+file_path+"\\" +file)        
-                print ("Moving   to:" +dest_folder+"\\" +file)    
-                # Mover el archivo a la carpeta de destino
-                shutil.move(file_path, os.path.join(dest_folder, file))
+  
+    move_files(src_folder,tar_folder,args.deldate,args.delstr,args.addNameFolderToFolder,args.addNameFolderToFile)
+    
 
 
-    move_files(src_folder)
 
 # for dirpath, dirnames, filenames in os.walk(root_dir):
 #     for filename in filenames:
