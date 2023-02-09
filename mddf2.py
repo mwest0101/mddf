@@ -32,6 +32,7 @@ parser.add_argument('-adf', '--addDateToFileName',      action='store_true',    
 parser.add_argument('-aff', '--addFolderToFileName',    action='store_true',   help='Add folder to filename')
 parser.add_argument('-afd', '--addFolderToNewFolder',   action='store_true',   help='Add source folder to new folder name')
 parser.add_argument('-rmc', '--removeChar',             action='store_true',   help='Remove a normalize strange char')
+parser.add_argument('-rep', '--replace',             action='store_true',   help='Replace files, (Autorename by default) ')
 
 #parser.add_argument("dn", help="add the date to begint of the file name")
 #parser.add_argument("r", help="add the date to begint of the file name")
@@ -50,5 +51,5 @@ if args.sd:
                args.move_file,args.copy_file,args.create_folder,args.demo,
                args.delStringFilename,args.delStringFilename,args.delStringDirectory,args.delDateDirectory,
                args.addDateToFileName,args.addFolderToFileName,args.addFolderToNewFolder,
-               args.removeChar)
+               args.removeChar,args.replace)
     

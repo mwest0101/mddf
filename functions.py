@@ -188,7 +188,7 @@ def move_files(src_folder,tar_folder,
                move_files,copy_files,create_folder,demo,
                delStrFromFileName,delDateFromFileName,delStrFromFolderName,delDateFromFolderName,
                addDateToFileName,addFolderToFileName,addFolderToNewFolder,
-               removeChar):
+               removeChar,replace):
    cont=0
 
    if (create_folder or move_files or copy_files or demo):                 
@@ -332,23 +332,24 @@ def move_files(src_folder,tar_folder,
             
          bandFileExists=True
          contFileSameName=0
-         while (bandFileExists):
-            bandFileExists=False
-            if os.path.exists(rutaArchivo):
-               addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The File exist  : "+rutaArchivo) 
-               addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The File exist  : "+rutaArchivo) 
-               bandFileExists=True
-               print("The file exists. : "+rutaArchivo)
-               file_name, file_ext = os.path.splitext(rutaArchivo)
-               
-               contFileSameName=contFileSameName+1
-               rutaArchivo=file_name+"_"+str(contFileSameName)+file_ext
-               print ("The File was renamed to: ", rutaArchivo)
-            else:
-               if(contFileSameName>0):
-                  print ("The new file name is: ", rutaArchivo)
-                  addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The new file name is : "+rutaArchivo) 
-                  addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The new file name is  : "+rutaArchivo) 
+         if(replace!=True):
+            while (bandFileExists):
+               bandFileExists=False
+               if os.path.exists(rutaArchivo):
+                  addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The File exist  : "+rutaArchivo) 
+                  addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The File exist  : "+rutaArchivo) 
+                  bandFileExists=True
+                  print("The file exists. : "+rutaArchivo)
+                  file_name, file_ext = os.path.splitext(rutaArchivo)
+                  
+                  contFileSameName=contFileSameName+1
+                  rutaArchivo=file_name+"_"+str(contFileSameName)+file_ext
+                  print ("The File was renamed to: ", rutaArchivo)
+               else:
+                  if(contFileSameName>0):
+                     print ("The new file name is: ", rutaArchivo)
+                     addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The new file name is : "+rutaArchivo) 
+                     addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The new file name is  : "+rutaArchivo) 
             
          
          
