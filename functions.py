@@ -309,19 +309,21 @@ def move_files(src_folder,tar_folder,
          dest_folder=remove_first_char(dest_folder)
          dest_folder=dest_folder.strip()
          
-         if (move_files or copy_files or create_folder):
-            createFolder(dest_folder)    
-             
-         print ("from: "+file_path)        
-         print ("to:" +dest_folder+"\\" +file)    
+        
             
          rutaArchivo=os.path.join(dest_folder, newFile)
          
          if(removeChar==True):            
             rutaArchivo=strangeCharToNormalChar(rutaArchivo) 
             # Mover el archivo a la carpeta de destino
-            
+         if (move_files or copy_files or create_folder):
+            createFolder(dest_folder)    
+             
+         print ("from: "+file_path)        
+         print ("to:" +dest_folder+"\\" +file)    
+                         
          band="NULL" 
+         
          if (demo):
             print("Creating Demo...") 
             addTextToFile(src_folder+'\\process_demo.html',getLineHtml(str(cont),
@@ -337,15 +339,16 @@ def move_files(src_folder,tar_folder,
                addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The File exist  : "+rutaArchivo) 
                bandFileExists=True
                print("The file exists. : "+rutaArchivo)
-               file_name, file_ext = os.path.splitext(file_path)
+               file_name, file_ext = os.path.splitext(rutaArchivo)
                
                contFileSameName=contFileSameName+1
                rutaArchivo=file_name+"_"+str(contFileSameName)+file_ext
                print ("The File was renamed to: ", rutaArchivo)
             else:
-               print ("The new file name is: ", rutaArchivo)
-               addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The new file name is : "+rutaArchivo) 
-               addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The new file name is  : "+rutaArchivo) 
+               if(contFileSameName>0):
+                  print ("The new file name is: ", rutaArchivo)
+                  addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The new file name is : "+rutaArchivo) 
+                  addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The new file name is  : "+rutaArchivo) 
             
          
          
