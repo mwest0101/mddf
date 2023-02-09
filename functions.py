@@ -274,7 +274,7 @@ def move_files(src_folder,tar_folder,
             
             
              #concateno y creo ruta destino y nombre de archivo destino completo 
-         newFile=addToNewFile+newFile
+         newFile=addToNewFile+"_"+newFile
          
          #dest_folder=dest_folder+addToNewFolder
          dest_folder=dest_folder.strip()
