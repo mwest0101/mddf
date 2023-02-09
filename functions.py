@@ -62,8 +62,10 @@ def searchRegAndReplace(cadena,cadRegExp):
 
 def remove_date(cadena):
    cadena=searchRegAndReplace(cadena,"\d{1,2}[/-]\d{1,2}[/-]\d{4} \[.*\]")
+   cadena=searchRegAndReplace(cadena,"\d{1,2}[/-]\d{1,2}[/-]\d{4} \(.*\)")
    cadena=searchRegAndReplace(cadena,"\d{1,2}[/-]\d{1,2}[/-]\d{4}")
    cadena=searchRegAndReplace(cadena,"\d{4}[/-]\d{1,2}[/-]\d{1,2} \[.*\]")
+   cadena=searchRegAndReplace(cadena,"\d{4}[/-]\d{1,2}[/-]\d{1,2} \(.*\)")
    cadena=searchRegAndReplace(cadena,"\d{4}[/-]\d{1,2}[/-]\d{1,2}")
    cadena=searchRegAndReplace(cadena,"\d{4}[/-]\d{1,2}")                              
    cadena=searchRegAndReplace(cadena,"\d{1,2}[/-]\d{4}")
@@ -78,6 +80,8 @@ def remove_first_char(cadena):
    
    if cadena[-1] == "_":
       cadena= cadena[:-1]
+      
+
    
    return cadena
     
@@ -178,6 +182,7 @@ def getFooterHtml():
    return cadena
 
 
+   
                        
 def move_files(src_folder,tar_folder,
                move_files,copy_files,create_folder,demo,
@@ -244,9 +249,9 @@ def move_files(src_folder,tar_folder,
             addToNewFile=addToNewFile+"_"+lastFolder
                                              
          # Add de original folder name to the begin of the new folder name
-         if (addFolderToNewFolder==True):   
-            print ("Adding last folder = [ "+lastFolder+"  ] to folder name")
-            addToNewFolder=addToNewFolder+"_"+lastFolder
+         #if (addFolderToNewFolder==True):   
+         #   print ("Adding last folder = [ "+lastFolder+"  ] to folder name")
+         #   addToNewFolder=addToNewFolder+"_"+lastFolder
                               
          modify_date = datetime.fromtimestamp(os.path.getmtime(file_path))                
          dest_folder = os.path.join(tar_folder, modify_date.strftime("%Y"))
@@ -257,7 +262,7 @@ def move_files(src_folder,tar_folder,
          if (move_files or copy_files or create_folder):
             createFolder(dest_folder)
                
-         dest_folder = dest_folder + "\\" + modify_date.strftime("%m - %B")
+         dest_folder = dest_folder + "\\" + modify_date.strftime("%m (%B)")
          
          if(removeChar==True):
             dest_folder=strangeCharToNormalChar(dest_folder)                                      
@@ -265,15 +270,16 @@ def move_files(src_folder,tar_folder,
          if (move_files or copy_files or create_folder):
             createFolder(dest_folder)                  
                  
-         dest_folder = dest_folder + "\\" + modify_date.strftime("%Y-%m-%d [ %A ]")
+         dest_folder = dest_folder + "\\" + modify_date.strftime("%Y-%m-%d (%A)")
             
             
              #concateno y creo ruta destino y nombre de archivo destino completo 
          newFile=addToNewFile+newFile
          
-         dest_folder=dest_folder+addToNewFolder
+         #dest_folder=dest_folder+addToNewFolder
          dest_folder=dest_folder.strip()
          dest_folder=remove_first_char(dest_folder)
+         
             
          newFile=remove_first_char(newFile)
          
@@ -284,14 +290,27 @@ def move_files(src_folder,tar_folder,
             print("Copy Files...")                  
                
          if (create_folder):
-            print("Creating Folder...")
+            print("Creating Folder... "+dest_folder)
+            
          if(removeChar==True):
             dest_folder=strangeCharToNormalChar(dest_folder)                           
          
          if (move_files or copy_files or create_folder):
             createFolder(dest_folder)                     
-            
-
+         
+         if (addFolderToNewFolder==True):   
+            print ("Adding last folder = [ "+lastFolder+"  ] to folder name")
+            dest_folder=dest_folder+ "\\" +lastFolder
+         
+         
+         
+         if(removeChar==True):
+            dest_folder=strangeCharToNormalChar(dest_folder)      
+         dest_folder=remove_first_char(dest_folder)
+         dest_folder=dest_folder.strip()
+         
+         if (move_files or copy_files or create_folder):
+            createFolder(dest_folder)    
              
          print ("from: "+file_path)        
          print ("to:" +dest_folder+"\\" +file)    
@@ -301,6 +320,7 @@ def move_files(src_folder,tar_folder,
          if(removeChar==True):            
             rutaArchivo=strangeCharToNormalChar(rutaArchivo) 
             # Mover el archivo a la carpeta de destino
+            
          band="NULL" 
          if (demo):
             print("Creating Demo...") 
@@ -308,11 +328,33 @@ def move_files(src_folder,tar_folder,
             file_path,rutaArchivo,"OK",file_path))
             band="SIMULATION"      
             
+         bandFileExists=True
+         contFileSameName=0
+         while (bandFileExists):
+            bandFileExists=False
+            if os.path.exists(rutaArchivo):
+               addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The File exist  : "+rutaArchivo) 
+               addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The File exist  : "+rutaArchivo) 
+               bandFileExists=True
+               print("The file exists. : "+rutaArchivo)
+               file_name, file_ext = os.path.splitext(file_path)
+               
+               contFileSameName=contFileSameName+1
+               rutaArchivo=file_name+"_"+str(contFileSameName)+file_ext
+               print ("The File was renamed to: ", rutaArchivo)
+            else:
+               print ("The new file name is: ", rutaArchivo)
+               addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The new file name is : "+rutaArchivo) 
+               addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The new file name is  : "+rutaArchivo) 
+            
+         
          
             
+            
          if (move_files or copy_files):
-          
+            
             try:            
+               
                if  (move_files):
                   
                   shutil.move(file_path, rutaArchivo)
@@ -321,10 +363,13 @@ def move_files(src_folder,tar_folder,
                   shutil.copy(file_path, rutaArchivo)
                   band="Copy OK"
             except:
-               addTextToFile(src_folder+'\\mddf2_move_log.txt',"I can't move or copy from: "+file_path+"\\" +file)
-               addTextToFile(src_folder+'\\mddf2_move_log.txt',"I can't move or copy to  : "+rutaArchivo)                                          
-               addTextToFile(tar_folder+'\\mddf2_move_log.txt',"I can't move or copy from: "+file_path+"\\" +file)
-               addTextToFile(tar_folder+'\\mddf2_move_log.txt',"I can't move or copy to  : "+rutaArchivo) 
+               addTextToFile(src_folder+'\\mddf2_Error_log.txt',"==========================================================")
+               addTextToFile(src_folder+'\\mddf2_Error_log.txt',"I can't move or copy from: "+file_path+"\\" +file)
+               addTextToFile(src_folder+'\\mddf2_Error_log.txt',"I can't move or copy to  : "+rutaArchivo)         
+
+               addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"==========================================================")                                                
+               addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"I can't move or copy from: "+file_path+"\\" +file)
+               addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"I can't move or copy to  : "+rutaArchivo) 
                band="FAIL"                     
                print ("I can't move or copy: "+file_path+"\\" +file)
          
