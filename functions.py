@@ -91,9 +91,14 @@ def getLastFolder(cadena):
    return base
 
 def addTextToFile(pathToFile,cadena):
-   file = open(pathToFile,'a')
-   file.write('\n' + cadena)
-   file.close()  
+   try: 
+      file = open(pathToFile,'a')
+      file.write('\n' + cadena)
+      file.close()  
+   except:
+      print ("Can't write the file: "+pathToFile)
+      print ("With Text: "+cadena)
+      
 
 
 def getHeadHtml():
