@@ -117,6 +117,11 @@ def getHeadHtml():
    <title>MDDF2 Procces Files List</title>
    </head>
       <body>
+      <style>
+         img {
+         max-width: 20rem;
+         }
+      </style>
          <table class=\"table table-striped-columns\">
             <tr>
                <th>#</th>
@@ -179,7 +184,7 @@ def getLineHtml(number,srcPath,tarPath,status,image):
    cadena=cadena+"<td>"+escape_html(srcPath)+"</td>"
    cadena=cadena+"<td>"+escape_html(tarPath)+"</td>"
    cadena=cadena+"<td>"+status+"</td>"      
-   cadena=cadena+"<td><img src=\""+image+"\" width=\"80\" ></td>"      
+   cadena=cadena+"<td><img src=\""+image+"\" ></td>"      
    cadena=cadena+"</tr>"
    return cadena
    
