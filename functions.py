@@ -38,8 +38,12 @@ def buscar_fecha(cadena):
       return -1
    
 def readRemoveFile():
-   with open(os.getcwd()+'\\remove.list', "r") as file:
-      lineas = file.readlines()
+   try:
+      with open(os.getcwd()+'\\remove.list', "r") as file:
+         lineas = file.readlines()
+   except:
+      print ("Can't read : "+os.getcwd()+'\\remove.list')
+      
    return lineas
 
 def cleanStrangeChars(lineas,cadena):
