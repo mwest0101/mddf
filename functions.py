@@ -210,15 +210,20 @@ def moveOrCopyFiles(file_path,rutaArchivo,tar_folder,copy_files,move_files):
    global copiados
    global errores
    global total
-   
+   operacion=""
    total=total+1
+   if  (move_files):
+      operacion="move"
+   if  (copy_files):
+      operacion="copy"
+   band="Fail"
    try:            
       if  (move_files):
      
 
          shutil.move(file_path, rutaArchivo)
          band="Move OK"
-         operacion="move"
+         
       
          
       if (copy_files):
@@ -226,7 +231,7 @@ def moveOrCopyFiles(file_path,rutaArchivo,tar_folder,copy_files,move_files):
 
          shutil.copy(file_path, rutaArchivo)
          band="Copy OK"
-         operacion="copy"
+         
       
       copiados=copiados+1
          
