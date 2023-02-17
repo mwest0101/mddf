@@ -10,6 +10,10 @@ import html
 import unicodedata
 
 
+copiados=0
+errores=0
+total=0
+fileName=""
 locale.setlocale(locale.LC_ALL, '')
 
 def createFolder(cadena_folder):
@@ -23,6 +27,7 @@ def removeExtrangeChars(cadena):
    cadena=cadena.replace("\r","")
    cadena=cadena.replace("\n","")
    cadena=cadena.replace("\t","")
+   
    cadena=cadena.replace(" ","")
    
    return cadena
@@ -31,10 +36,10 @@ def buscar_fecha(cadena):
    patron = re.compile('\d{1,2}[/-]\d{1,2}[/-]\d{4}')
    fecha = re.search(patron, cadena)
    if fecha:
-      print(fecha.group())
+      
       return fecha.start()
    else:
-      print("not found")
+      
       return -1
    
 def readRemoveFile():
@@ -45,16 +50,21 @@ def readRemoveFile():
       print ("Can't read : "+os.getcwd()+'\\remove.list')
       
    return lineas
-
+def removeStrs(cadena):
+      cadena=cadena.replace("  "," ")
+      cadena=cadena.replace("  "," ")
+      cadena=cadena.replace("  "," ")
+      cadena=cadena.replace("__","_")
+      return cadena
+   
 def cleanStrangeChars(lineas,cadena):
    for linea in lineas:
-      print(removeExtrangeChars(linea))
+      #print(removeExtrangeChars(linea))
       cadena=cadena.replace(removeExtrangeChars(linea),"")
-   cadena=cadena.replace("  "," ")
-   cadena=cadena.replace("  "," ")
-   cadena=cadena.replace("  "," ")
+      removeStrs(cadena)
+    
+   
    return cadena
-
    
 def searchRegAndReplace(cadena,cadRegExp):   
    patron = re.compile(cadRegExp)
@@ -62,7 +72,6 @@ def searchRegAndReplace(cadena,cadRegExp):
    if fecha:
       cadena=cadena.replace(fecha.group(), '')
    return cadena
-
 
 def remove_date(cadena):
    cadena=searchRegAndReplace(cadena,"\d{1,2}[/-]\d{1,2}[/-]\d{4} \[.*\]")
@@ -73,9 +82,7 @@ def remove_date(cadena):
    cadena=searchRegAndReplace(cadena,"\d{4}[/-]\d{1,2}[/-]\d{1,2}")
    cadena=searchRegAndReplace(cadena,"\d{4}[/-]\d{1,2}")                              
    cadena=searchRegAndReplace(cadena,"\d{1,2}[/-]\d{4}")
-
    return cadena   
-
 
 def remove_first_char(cadena):
    
@@ -84,8 +91,6 @@ def remove_first_char(cadena):
    
    if cadena[-1] == "_":
       cadena= cadena[:-1]
-      
-
    
    return cadena
     
@@ -94,14 +99,15 @@ def getLastFolder(cadena):
    base = os.path.basename(directory)
    return base
 
-def addTextToFile(pathToFile,cadena):
-   try: 
-      file = open(pathToFile,'a')
-      file.write('\n' + cadena)
-      file.close()  
-   except:
-      print ("Can't write the file: "+pathToFile)
-      print ("With Text: "+cadena)
+def addTextToFile(pathToFile,cadena,printLog):
+      try: 
+         file = open(pathToFile,'a')
+         file.write('\n' + cadena)
+         file.close()  
+      except:
+         if(printLog==True):
+            print ("Can't write the file: "+pathToFile)
+            print ("With Text: "+cadena)
       
 
 
@@ -128,8 +134,30 @@ def getHeadHtml():
                <th>Source path</th>
                <th>Target path</th>
                <th>Status</th>
-               <th>Image</th>
+               <th>Cont</th>
+               <th>Image Source</th>
+               <th>Image Target</th>
             </tr>"""
+   return cadena
+def getLineHtml(number,srcPath,tarPath,status,imageSource,imageTarget,strcont):
+   print(srcPath)
+   cadena=""
+   cadena=cadena+"<tr>"
+   cadena=cadena+"<td>"+number+"</td>"
+   cadena=cadena+"<td>"+escape_html(srcPath)+"</td>"
+   cadena=cadena+"<td>"+escape_html(tarPath)+"</td>"
+   cadena=cadena+"<td>"+status+"</td>"      
+   cadena=cadena+"<td>"+strcont+"</td>" 
+   cadena=cadena+"<td><img src=\""+imageSource+"\" ></td>"      
+   cadena=cadena+"<td><img src=\""+imageTarget+"\" ></td>"      
+   cadena=cadena+"</tr>"
+   return cadena
+   
+def getFooterHtml():
+   cadena="""</table>
+   </body>
+   </html>
+   """
    return cadena
 
 def escape_html(text):
@@ -155,7 +183,6 @@ def escape_html(text):
    return text
 
 def strangeCharToNormalChar(text):
- 
    replace_dict = {"À":"A;","Á":"A","Â":"A","Ã":"A",
                      "Ä":"A","Å":"A","Æ":"A","Ç":"C","È":"E","É":"E",
                      "Ê":"E","Ë":"E","Ì":"I","Í":"I","Î":"I","Ï":"I",
@@ -176,98 +203,154 @@ def strangeCharToNormalChar(text):
    
 
 
-def getLineHtml(number,srcPath,tarPath,status,image):
-   print(srcPath)
-   cadena=""
-   cadena=cadena+"<tr>"
-   cadena=cadena+"<td>"+number+"</td>"
-   cadena=cadena+"<td>"+escape_html(srcPath)+"</td>"
-   cadena=cadena+"<td>"+escape_html(tarPath)+"</td>"
-   cadena=cadena+"<td>"+status+"</td>"      
-   cadena=cadena+"<td><img src=\""+image+"\" ></td>"      
-   cadena=cadena+"</tr>"
-   return cadena
-   
-def getFooterHtml():
-   cadena="""</table>
-   </body>
-   </html>
-   """
-   return cadena
 
 
+
+def moveOrCopyFiles(file_path,rutaArchivo,tar_folder,copy_files,move_files):
+   global copiados
+   global errores
+   global total
    
-                       
+   total=total+1
+   try:            
+      if  (move_files):
+     
+
+         shutil.move(file_path, rutaArchivo)
+         band="Move OK"
+         operacion="move"
+      
+         
+      if (copy_files):
+        
+
+         shutil.copy(file_path, rutaArchivo)
+         band="Copy OK"
+         operacion="copy"
+      
+      copiados=copiados+1
+         
+         
+      
+      print("--------------------------------------------------------")
+      print("File :"+file_path+" was ")
+      print(operacion)
+      print("to   :"+rutaArchivo)
+      print("--------------------------------------------------------")
+
+   except:
+      errores=errores+1
+      print ("________________________________________________________________")
+      print ("****ERROR*******************************************************")
+           
+      addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"==========================================================",True)                                                
+      addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"I can't "+operacion+" or copy from: "+file_path,True)
+      addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"I can't "+operacion+" or copy to  : "+rutaArchivo,True) 
+      band="FAIL"                     
+      print ("I can't "+operacion+" from : "+file_path)
+      print ("I can't "+operacion+" to: "+rutaArchivo)
+      print ("****************************************************************")  
+
+def getFechaHora():
+   global fileName
+   if(fileName==""):
+      fecha_y_hora_actual = datetime.now()
+      fileName=fecha_y_hora_actual.strftime("%d-%m-%Y_%H-%M-%S_")
+   return fileName
+
+def checkIfExist(tar_folder,file_path,rutaArchivo):
+   bandFileExists=True
+   contFileSameName=0
+   try:
+      while (bandFileExists):
+         bandFileExists=False
+                        
+         if os.path.exists(rutaArchivo):
+            #addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The File exist  : "+rutaArchivo) 
+            addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"The File exist  : "+rutaArchivo,True) 
+            bandFileExists=True
+            print("The file exists. : "+rutaArchivo)
+            file_name, file_ext = os.path.splitext(rutaArchivo)
+                  
+            contFileSameName=contFileSameName+1
+            rutaArchivo=file_name+"_"+str(contFileSameName)+file_ext
+            print ("The File was renamed to: ", rutaArchivo)
+            
+         else:
+            if(contFileSameName>0):
+               print ("The new file name is: ", rutaArchivo)
+               #addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The new file name is : "+rutaArchivo) 
+               addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"The new file name is  : "+rutaArchivo,True) 
+   except:
+      print ("---ERROR--------------------------------------------------------")
+      print ("----------------------------------------------------------------")                  
+      print ("I can't open from: "+file_path)
+      print ("I can't open to : "+rutaArchivo)                  
+      print ("----------------------------------------------------------------") 
+      
+      addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"==========================================================",True)                                                
+      addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"I can't open from: "+file_path,True)
+      addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"I can't open to : "+rutaArchivo,True)                   
+                      
+   return rutaArchivo              
+                      
 def move_files(src_folder,tar_folder,
                move_files,copy_files,create_folder,demo,
                delStrFromFileName,delDateFromFileName,delStrFromFolderName,delDateFromFolderName,
                addDateToFileName,addFolderToFileName,addFolderToNewFolder,
                removeChar,replace):
    cont=0
-
-   if (create_folder or move_files or copy_files or demo):                 
-      addTextToFile(src_folder+'\\process_demo.html', getHeadHtml())
-               
-   if (create_folder or move_files or copy_files):            
-      addTextToFile(tar_folder+'\\process_demo.html', getHeadHtml())
-                       
    
-                                   
+   global copiados
+   global errores
+   global total
+   
+   
+
+# Obtener la fecha y hora actual
+
+
+   if (create_folder or move_files or copy_files):            
+      addTextToFile(tar_folder+'\\'+getFechaHora()+'result.html', getHeadHtml(),False)
+                       
    for dirpath, dirnames, filenames in os.walk(src_folder):
       for file in filenames:
          file_path = os.path.join(dirpath, file)
+         
          newFile=file
          cont=cont+1
+         modify_date = datetime.fromtimestamp(os.path.getmtime(file_path))   
          print ("===========================================================================")  
          print ("[ "+str(cont)+" ]")
                
          lastFolder=strangeCharToNormalChar(getLastFolder(file_path))
-               
+         
          print("file_path="+file_path)
          print("lastFolder="+lastFolder)
-                # --------------------------------------------------               
-               # -----DELETE----
-               
-                # Delete string contained in the file "removeStrFromFiles" 
-               # from the file name
+
          if (delStrFromFileName==True):
             newFile=cleanStrangeChars(readRemoveFile(),newFile) 
                
-               # Delete the date from the file name                         
          if (delDateFromFileName==True):
             newFile=remove_date(newFile) 
 
-         # Delete string contained in the file "removeStrFromFiles" 
-         # from the folder name                     
          if (delStrFromFolderName==True):
             lastFolder=cleanStrangeChars(readRemoveFile(),lastFolder) 
                   
-               # Delete the date from the folder name                                              
          if (delDateFromFolderName==True):
             lastFolder=remove_date(lastFolder) 
                   
-         # --------------------------------------------------                  
-         # ------------------ADD-----------------------------
-         # Add de date to the start of file name
          addToNewFile=""
          addToNewFolder=""
-               
-         if (addDateToFileName==True):   
-            print ("Adding date = [ "+modify_date.strftime("%Y-%m-%d")+" ] to file name")
-            addToNewFile=addToNewFile+"_"+modify_date.strftime("%Y-%m-%d")
+         lastFolder=lastFolder.strip()
+         if (addDateToFileName==True):               
+            addToNewFile=addToNewFile+"_"+modify_date.strftime("%Y-%m-%d")            
+            print ("Adding date to filename , addToNewFile = ["+addToNewFile+"]")
                   
-
-         # Add de original folder name to the begin of the new file name
-         if (addFolderToFileName==True):  
-            print ("Adding last folder = [ "+lastFolder+" ] to file name")
+         if (addFolderToFileName==True):              
             addToNewFile=addToNewFile+"_"+lastFolder
+            print ("Adding folder to filename , addToNewFile = ["+addToNewFile+"]")
                                              
-         # Add de original folder name to the begin of the new folder name
-         #if (addFolderToNewFolder==True):   
-         #   print ("Adding last folder = [ "+lastFolder+"  ] to folder name")
-         #   addToNewFolder=addToNewFolder+"_"+lastFolder
-                              
-         modify_date = datetime.fromtimestamp(os.path.getmtime(file_path))                
          dest_folder = os.path.join(tar_folder, modify_date.strftime("%Y"))
          
          if(removeChar==True):
@@ -276,7 +359,7 @@ def move_files(src_folder,tar_folder,
          if (move_files or copy_files or create_folder):
             createFolder(dest_folder)
                
-         dest_folder = dest_folder + "\\" + modify_date.strftime("%m (%B)")
+         dest_folder = dest_folder + "\\" + modify_date.strftime("%m_(%B)")
          
          if(removeChar==True):
             dest_folder=strangeCharToNormalChar(dest_folder)                                      
@@ -284,17 +367,14 @@ def move_files(src_folder,tar_folder,
          if (move_files or copy_files or create_folder):
             createFolder(dest_folder)                  
                  
-         dest_folder = dest_folder + "\\" + modify_date.strftime("%Y-%m-%d (%A)")
+         dest_folder = dest_folder + "\\" + modify_date.strftime("%Y-%m-%d_(%A)")
             
-            
-             #concateno y creo ruta destino y nombre de archivo destino completo 
          newFile=addToNewFile+"_"+newFile
+         newFile=removeStrs(newFile)
          
-         #dest_folder=dest_folder+addToNewFolder
          dest_folder=dest_folder.strip()
          dest_folder=remove_first_char(dest_folder)
          
-            
          newFile=remove_first_char(newFile)
          
          if (move_files):
@@ -312,19 +392,18 @@ def move_files(src_folder,tar_folder,
          if (move_files or copy_files or create_folder):
             createFolder(dest_folder)                     
          
-         if (addFolderToNewFolder==True):   
-            print ("Adding last folder = [ "+lastFolder+"  ] to folder name")
+         if (addFolderToNewFolder==True):               
             dest_folder=dest_folder+ "\\" +lastFolder
-         
-         
+            print ("Adding folder to ne folder name = ["+dest_folder+"]")
          
          if(removeChar==True):
-            dest_folder=strangeCharToNormalChar(dest_folder)      
+            dest_folder=strangeCharToNormalChar(dest_folder)    
+              
          dest_folder=remove_first_char(dest_folder)
          dest_folder=dest_folder.strip()
          
-        
-            
+         print ("dest_folder: "+dest_folder)
+         print ("newFile: "+newFile)
          rutaArchivo=os.path.join(dest_folder, newFile)
          
          if(removeChar==True):            
@@ -333,82 +412,35 @@ def move_files(src_folder,tar_folder,
          if (move_files or copy_files or create_folder):
             createFolder(dest_folder)    
              
-         print ("from: "+file_path)        
-         print ("to:" +dest_folder+"\\" +file)    
+
                          
          band="NULL" 
          
          if (demo):
             print("Creating Demo...") 
-            addTextToFile(src_folder+'\\process_demo.html',getLineHtml(str(cont),
-            file_path,rutaArchivo,"OK",file_path))
+            
+            addTextToFile(tar_folder+'\\'+getFechaHora()+'result.html',getLineHtml(str(cont),file_path,rutaArchivo,"OK",file_path,rutaArchivo,"Tot="+str(total)+"|OK="+str(copiados)+"|ER="+str(errores)),False)
             band="SIMULATION"      
             
-         bandFileExists=True
-         contFileSameName=0
+         
          if(replace!=True):
-            while (bandFileExists):
-               bandFileExists=False
-               try:          
-                  if os.path.exists(rutaArchivo):
-                     addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The File exist  : "+rutaArchivo) 
-                     addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The File exist  : "+rutaArchivo) 
-                     bandFileExists=True
-                     print("The file exists. : "+rutaArchivo)
-                     file_name, file_ext = os.path.splitext(rutaArchivo)
-                     
-                     contFileSameName=contFileSameName+1
-                     rutaArchivo=file_name+"_"+str(contFileSameName)+file_ext
-                     print ("The File was renamed to: ", rutaArchivo)
-                  else:
-                     if(contFileSameName>0):
-                        print ("The new file name is: ", rutaArchivo)
-                        addTextToFile(src_folder+'\\mddf2_Error_log.txt',"The new file name is : "+rutaArchivo) 
-                        addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"The new file name is  : "+rutaArchivo) 
-               except:
-                  addTextToFile(src_folder+'\\mddf2_Error_log.txt',"==========================================================")
-                  addTextToFile(src_folder+'\\mddf2_Error_log.txt',"I can't open from: "+file_path+"\\" +file)
-                  addTextToFile(src_folder+'\\mddf2_Error_log.txt',"I can't open to  : "+rutaArchivo)         
-
-                  addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"==========================================================")                                                
-                  addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"I can't open from: "+file_path+"\\" +file)
-                  addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"I can't open to : "+rutaArchivo) 
+            rutaArchivo=checkIfExist(tar_folder,file_path,rutaArchivo)
             
+           
          
          
-            
-            
+         
+         
+                
          if (move_files or copy_files):
             
-            try:            
-               
-               if  (move_files):
-                  
-                  shutil.move(file_path, rutaArchivo)
-                  band="Move OK"
-               if (copy_files):
-                  shutil.copy(file_path, rutaArchivo)
-                  band="Copy OK"
-            except:
-               addTextToFile(src_folder+'\\mddf2_Error_log.txt',"==========================================================")
-               addTextToFile(src_folder+'\\mddf2_Error_log.txt',"I can't move or copy from: "+file_path+"\\" +file)
-               addTextToFile(src_folder+'\\mddf2_Error_log.txt',"I can't move or copy to  : "+rutaArchivo)         
-
-               addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"==========================================================")                                                
-               addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"I can't move or copy from: "+file_path+"\\" +file)
-               addTextToFile(tar_folder+'\\mddf2_Error_log.txt',"I can't move or copy to  : "+rutaArchivo) 
-               band="FAIL"                     
-               print ("I can't move or copy: "+file_path+"\\" +file)
+            moveOrCopyFiles(file_path,rutaArchivo,tar_folder,copy_files,move_files)
+            
          
-         if (demo or move_files or copy_files):
-            
-            addTextToFile(src_folder+'\\process_demo.html',getLineHtml(str(cont),file_path,rutaArchivo,band,file_path))   
-            
          if (create_folder or move_files or copy_files):
-            addTextToFile(tar_folder+'\\process_demo.html',getLineHtml(str(cont),file_path,rutaArchivo,band,file_path))   
-
-   if (demo or move_files or copy_files):                 
-      addTextToFile(src_folder+'\\process_demo.html', getFooterHtml())
-               
+            addTextToFile(tar_folder+'\\'+getFechaHora()+'result.html',getLineHtml(str(cont),file_path,rutaArchivo,"OK",file_path,rutaArchivo,"Tot="+str(total)+"|OK="+str(copiados)+"|ER="+str(errores)),False)
+         print ("=========================================================================")
+         print ("Total= "+ str(total) +" OK= "+ str(copiados)+ " FAILS= "+str(errores))
+         print ("=========================================================================")
    if (create_folder or move_files or copy_files):            
-      addTextToFile(tar_folder+'\\process_demo.html', getFooterHtml())                  
+      addTextToFile(tar_folder+'\\'+getFechaHora()+'result.html', getFooterHtml(),False)                  
