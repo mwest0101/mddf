@@ -16,6 +16,8 @@ total=0
 fileName=""
 locale.setlocale(locale.LC_ALL, '')
 
+
+
 def createFolder(cadena_folder):
    try:                  
       if not os.path.exists(cadena_folder):
@@ -23,24 +25,15 @@ def createFolder(cadena_folder):
    except:
       print ("Can't Create Folder : "+cadena_folder)
       
-def removeExtrangeChars(cadena):
-   cadena=cadena.replace("\r","")
-   cadena=cadena.replace("\n","")
-   cadena=cadena.replace("\t","")
-   
-   cadena=cadena.replace(" ","")
-   
-   return cadena
+
 
 def buscar_fecha(cadena):
    patron = re.compile('\d{1,2}[/-]\d{1,2}[/-]\d{4}')
    fecha = re.search(patron, cadena)
-   if fecha:
-      
+   if fecha:      
       return fecha.start()
-   else:
-      
-      return -1
+   else:      
+      return -1   
    
 def readRemoveFile():
    try:
@@ -48,20 +41,16 @@ def readRemoveFile():
          lineas = file.readlines()
    except:
       print ("Can't read : "+os.getcwd()+'\\remove.list')
-      
+            
    return lineas
-def removeStrs(cadena):
-      cadena=cadena.replace("  "," ")
-      cadena=cadena.replace("  "," ")
-      cadena=cadena.replace("  "," ")
-      cadena=cadena.replace("__","_")
-      return cadena
+
+
    
 def cleanStrangeChars(lineas,cadena):
    for linea in lineas:
       #print(removeExtrangeChars(linea))
       cadena=cadena.replace(removeExtrangeChars(linea),"")
-      removeStrs(cadena)
+      
     
    
    return cadena
@@ -71,6 +60,27 @@ def searchRegAndReplace(cadena,cadRegExp):
    fecha = re.search(patron, cadena)
    if fecha:
       cadena=cadena.replace(fecha.group(), '')
+   return cadena
+
+def removeStrs(cadena):
+   
+   while(cadena.find("  ")!=-1):
+      cadena=cadena.replace("  "," ")   
+   
+   cadena=cadena.replace(" ","_")
+   
+   while(cadena.find("__")!=-1):
+      cadena=cadena.replace("__","_")   
+      
+   
+   return cadena
+   
+def removeExtrangeChars(cadena):
+   
+   cadena=cadena.replace("\r","")
+   cadena=cadena.replace("\n","")
+   cadena=cadena.replace("\t","")   
+   cadena=removeStrs(cadena)
    return cadena
 
 def remove_date(cadena):
@@ -84,13 +94,14 @@ def remove_date(cadena):
    cadena=searchRegAndReplace(cadena,"\d{1,2}[/-]\d{4}")
    return cadena   
 
-def remove_first_char(cadena):
-   
-   if cadena[0] == "_":
-      cadena= cadena[1:]
-   
-   if cadena[-1] == "_":
-      cadena= cadena[:-1]
+def remove_first_char(cadena):  
+   print(" -> "+cadena) 
+   if (cadena!=""):
+      if cadena[0] == "_":
+         cadena= cadena[1:]
+      
+      if cadena[-1] == "_":
+         cadena= cadena[:-1]
    
    return cadena
     
@@ -100,6 +111,7 @@ def getLastFolder(cadena):
    return base
 
 def addTextToFile(pathToFile,cadena,printLog):
+      
       try: 
          file = open(pathToFile,'a')
          file.write('\n' + cadena)
@@ -112,35 +124,38 @@ def addTextToFile(pathToFile,cadena,printLog):
 
 
 def getHeadHtml():
+   
    cadena="""
    <!DOCTYPE html>
-<html lang="en">
-<head>
-   <meta charset="UTF-8">
-   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-   <title>MDDF2 Procces Files List</title>
-   </head>
-      <body>
-      <style>
-         img {
-         max-width: 20rem;
-         }
-      </style>
-         <table class=\"table table-striped-columns\">
-            <tr>
-               <th>#</th>
-               <th>Source path</th>
-               <th>Target path</th>
-               <th>Status</th>
-               <th>Cont</th>
-               <th>Image Source</th>
-               <th>Image Target</th>
-            </tr>"""
+   <html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+      <title>MDDF2 Procces Files List</title>
+      </head>
+         <body>
+         <style>
+            img {
+            max-width: 20rem;
+            }
+         </style>
+            <table class=\"table table-striped-columns\">
+               <tr>
+                  <th>#</th>
+                  <th>Source path</th>
+                  <th>Target path</th>
+                  <th>Status</th>
+                  <th>Cont</th>
+                  <th>Image Source</th>
+                  <th>Image Target</th>
+               </tr>"""
+               
    return cadena
+
 def getLineHtml(number,srcPath,tarPath,status,imageSource,imageTarget,strcont):
-   print(srcPath)
+   
    cadena=""
    cadena=cadena+"<tr>"
    cadena=cadena+"<td>"+number+"</td>"
@@ -151,6 +166,7 @@ def getLineHtml(number,srcPath,tarPath,status,imageSource,imageTarget,strcont):
    cadena=cadena+"<td><img src=\""+imageSource+"\" ></td>"      
    cadena=cadena+"<td><img src=\""+imageTarget+"\" ></td>"      
    cadena=cadena+"</tr>"
+   
    return cadena
    
 def getFooterHtml():
@@ -180,6 +196,7 @@ def escape_html(text):
 
    for char, accented_char in replace_dict.items():
       text = text.replace(char, accented_char)
+      
    return text
 
 def strangeCharToNormalChar(text):
@@ -200,43 +217,31 @@ def strangeCharToNormalChar(text):
    return text  
  
 
-   
-
-
-
-
-
 def moveOrCopyFiles(file_path,rutaArchivo,tar_folder,copy_files,move_files):
    global copiados
    global errores
    global total
    operacion=""
    total=total+1
+   
    if  (move_files):
       operacion="move"
+   
    if  (copy_files):
       operacion="copy"
+   
    band="Fail"
+   
    try:            
       if  (move_files):
-     
-
          shutil.move(file_path, rutaArchivo)
          band="Move OK"
          
-      
-         
       if (copy_files):
-        
-
          shutil.copy(file_path, rutaArchivo)
          band="Copy OK"
          
-      
       copiados=copiados+1
-         
-         
-      
       print("--------------------------------------------------------")
       print("File :"+file_path+" was ")
       print(operacion)
@@ -332,7 +337,9 @@ def move_files(src_folder,tar_folder,
          
          print("file_path="+file_path)
          print("lastFolder="+lastFolder)
-
+         
+         #Procesamiento parametros DEL
+         
          if (delStrFromFileName==True):
             newFile=cleanStrangeChars(readRemoveFile(),newFile) 
                
@@ -348,14 +355,21 @@ def move_files(src_folder,tar_folder,
          addToNewFile=""
          addToNewFolder=""
          lastFolder=lastFolder.strip()
+         
+         # Procesamiento parametros ADD
+         
+         # Agrega la fecha al nombre de archivo
          if (addDateToFileName==True):               
             addToNewFile=addToNewFile+"_"+modify_date.strftime("%Y-%m-%d")            
             print ("Adding date to filename , addToNewFile = ["+addToNewFile+"]")
-                  
+
+
+         # Agrega al nombre de archivo el nombre de la carpeta padre
          if (addFolderToFileName==True):              
-            addToNewFile=addToNewFile+"_"+lastFolder
+            addToNewFile=addToNewFile+"_"+removeExtrangeChars(lastFolder)
             print ("Adding folder to filename , addToNewFile = ["+addToNewFile+"]")
-                                             
+
+         # Agrega la CARPETA otra CARPETA con el AÑO
          dest_folder = os.path.join(tar_folder, modify_date.strftime("%Y"))
          
          if(removeChar==True):
@@ -363,19 +377,22 @@ def move_files(src_folder,tar_folder,
          
          if (move_files or copy_files or create_folder):
             createFolder(dest_folder)
-               
+         
+         # Agrega la CARPETA otra CARPETA con el MES    
          dest_folder = dest_folder + "\\" + modify_date.strftime("%m_(%B)")
          
          if(removeChar==True):
             dest_folder=strangeCharToNormalChar(dest_folder)                                      
          
          if (move_files or copy_files or create_folder):
-            createFolder(dest_folder)                  
-                 
+            createFolder(dest_folder)       
+            
+         # Procesamiento parametros 
+         # Agrega la CARPETA otra CARPETA con la AÑO, MES y DIA         
          dest_folder = dest_folder + "\\" + modify_date.strftime("%Y-%m-%d_(%A)")
             
          newFile=addToNewFile+"_"+newFile
-         newFile=removeStrs(newFile)
+         newFile=removeExtrangeChars(newFile)
          
          dest_folder=dest_folder.strip()
          dest_folder=remove_first_char(dest_folder)
@@ -386,6 +403,7 @@ def move_files(src_folder,tar_folder,
             print("Moving Files...")
                
          if (copy_files):
+            
             print("Copy Files...")                  
                
          if (create_folder):
@@ -406,6 +424,7 @@ def move_files(src_folder,tar_folder,
               
          dest_folder=remove_first_char(dest_folder)
          dest_folder=dest_folder.strip()
+         dest_folder=removeExtrangeChars(dest_folder)
          
          print ("dest_folder: "+dest_folder)
          print ("newFile: "+newFile)
@@ -430,15 +449,14 @@ def move_files(src_folder,tar_folder,
          
          if(replace!=True):
             rutaArchivo=checkIfExist(tar_folder,file_path,rutaArchivo)
-            
-           
-         
-         
-         
-         
-                
-         if (move_files or copy_files):
-            
+         else:
+            if os.path.exists(rutaArchivo): 
+               print ("Borrando Archivo :"+rutaArchivo)   
+               addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"Borrando Archivo :"+rutaArchivo,True)                          
+               os.remove(rutaArchivo)
+               
+                         
+         if (move_files or copy_files):            
             moveOrCopyFiles(file_path,rutaArchivo,tar_folder,copy_files,move_files)
             
          
@@ -447,5 +465,6 @@ def move_files(src_folder,tar_folder,
          print ("=========================================================================")
          print ("Total= "+ str(total) +" OK= "+ str(copiados)+ " FAILS= "+str(errores))
          print ("=========================================================================")
+         
    if (create_folder or move_files or copy_files):            
       addTextToFile(tar_folder+'\\'+getFechaHora()+'result.html', getFooterHtml(),False)                  
