@@ -260,6 +260,7 @@ def moveOrCopyFiles(file_path,rutaArchivo,tar_folder,copy_files,move_files):
       print ("I can't "+operacion+" from : "+file_path)
       print ("I can't "+operacion+" to: "+rutaArchivo)
       print ("****************************************************************")  
+   return band
 
 def getFechaHora():
    global fileName
@@ -438,7 +439,7 @@ def move_files(src_folder,tar_folder,
              
 
                          
-         band="NULL" 
+         band="" 
          
          if (demo):
             print("Creating Demo...") 
@@ -446,22 +447,31 @@ def move_files(src_folder,tar_folder,
             addTextToFile(tar_folder+'\\'+getFechaHora()+'result.html',getLineHtml(str(cont),file_path,rutaArchivo,"OK",file_path,rutaArchivo,"Tot="+str(total)+"|OK="+str(copiados)+"|ER="+str(errores)),False)
             band="SIMULATION"      
             
+         removeFlag=True
          
          if(replace!=True):
             rutaArchivo=checkIfExist(tar_folder,file_path,rutaArchivo)
          else:
-            if os.path.exists(rutaArchivo): 
-               print ("Borrando Archivo :"+rutaArchivo)   
-               addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"Borrando Archivo :"+rutaArchivo,True)                          
-               os.remove(rutaArchivo)
-               
+            try:
+               if os.path.exists(rutaArchivo): 
+                  print ("Removing the file :"+rutaArchivo)   
+                  addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"Removing the file :"+rutaArchivo,True)                          
+                  
+                  os.remove(rutaArchivo)
+                  band=band+"[ File removed ]"
+            except:
+                  removeFlag=False
+                  print ("Can't remove the file :"+rutaArchivo)   
+                  band=band+"[ Fail Removing File ]"
+                  addTextToFile(tar_folder+'\\'+getFechaHora()+'mddf2_Error_log.txt',"Can't remove the file  :"+rutaArchivo,True)                          
+                              
                          
-         if (move_files or copy_files):            
-            moveOrCopyFiles(file_path,rutaArchivo,tar_folder,copy_files,move_files)
+         if (removeFlag and (move_files or copy_files )):            
+            band=band+"["+moveOrCopyFiles(file_path,rutaArchivo,tar_folder,copy_files,move_files)+"]"
             
          
          if (create_folder or move_files or copy_files):
-            addTextToFile(tar_folder+'\\'+getFechaHora()+'result.html',getLineHtml(str(cont),file_path,rutaArchivo,"OK",file_path,rutaArchivo,"Tot="+str(total)+"|OK="+str(copiados)+"|ER="+str(errores)),False)
+            addTextToFile(tar_folder+'\\'+getFechaHora()+'result.html',getLineHtml(str(cont),file_path,rutaArchivo,band,file_path,rutaArchivo,"Tot="+str(total)+"|OK="+str(copiados)+"|ER="+str(errores)),False)
          print ("=========================================================================")
          print ("Total= "+ str(total) +" OK= "+ str(copiados)+ " FAILS= "+str(errores))
          print ("=========================================================================")
