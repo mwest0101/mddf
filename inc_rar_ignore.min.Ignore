@@ -1,7 +1,0 @@
-*.rar
-*\.git\*
-*\node_modules\*
-*\vendor\*
-*\storage
-*\storage\*
-*\.bat

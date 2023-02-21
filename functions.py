@@ -361,7 +361,7 @@ def move_files(src_folder,tar_folder,
          
          # Agrega la fecha al nombre de archivo
          if (addDateToFileName==True):               
-            addToNewFile=addToNewFile+"_"+modify_date.strftime("%Y-%m-%d")            
+            addToNewFile=addToNewFile+"_"+modify_date.strftime("%Y-%m-%d_%H-%M-%S")            
             print ("Adding date to filename , addToNewFile = ["+addToNewFile+"]")
 
 
